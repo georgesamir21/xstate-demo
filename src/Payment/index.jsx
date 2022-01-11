@@ -5,6 +5,8 @@ import { paymentMachine } from "./Machine";
 export const Payment = () => {
   const [state, sendToMachine] = useMachine(paymentMachine);
 
+  const { context } = state;
+
   const hanldeSubmit = (e) => {
     e.preventDefault();
     const value = {
@@ -37,7 +39,9 @@ export const Payment = () => {
             <input type="text" name="cardNumber" id="cardNumber" />
           </div>
           <div className={classes.form_control}>
-            <button type="submit">Submit</button>
+            <button disabled={context.paymentIsDone} type="submit">
+              Submit
+            </button>
           </div>
         </form>
       </div>

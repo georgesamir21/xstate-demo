@@ -1,14 +1,11 @@
-import { createMachine } from "xstate";
-
-const doPayment = () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve("Done"), 2000);
-  });
-};
+import { assign, createMachine } from "xstate";
 
 export const paymentMachine = createMachine(
   {
     initial: "idle",
+    context: {
+      paymentIsDone: false,
+    },
     states: {
       idle: {
         on: {
@@ -26,9 +23,10 @@ export const paymentMachine = createMachine(
       loading: {
         invoke: {
           id: "doPayment",
-          src: () => doPayment(),
+          src: "doPayment",
           onDone: {
             target: "success",
+            actions: "paymentIsDone",
           },
           onError: {
             target: "error",
@@ -50,9 +48,24 @@ export const paymentMachine = createMachine(
   },
   {
     guards: {
+      // do some logic to check if the user can submit...
       isAllowedToSubmit: (ctx, event) =>
         event.payload.nameOnCard && event.payload.cardNumber,
     },
-    
+
+    services: {
+      // fake payment service...
+      doPayment: () => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => resolve("Done"), 2000);
+        });
+      },
+    },
+
+    actions: {
+      paymentIsDone: assign({
+        paymentIsDone: (context, event) => true,
+      }),
+    },
   }
 );
